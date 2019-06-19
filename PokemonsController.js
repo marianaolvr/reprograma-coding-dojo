@@ -5,7 +5,7 @@ connect()
 
 const calcularNivel = datas => {
   const diff = Math.abs(new Date(datas.dataInicio) - new Date(datas.dataFim)) / 3600000
-  return diff / 4;
+  return diff / 4 + nivelAnterior;
 }
 
 const getAll = async () => {
@@ -35,10 +35,13 @@ const update = (id, pokemon) => {
   )
 }
 
-const treinar = (id, datas) => {
+const treinar = async (id, datas) => {
+  const pokemon = await pokemonsModel.findById(id, 'nivel')
+  const nivelAnterior = pokemon.nivel
+
   return pokemonsModel.findByIdAndUpdate(
     id,
-    { $set: { nivel: calcularNivel(datas) } },
+    { $set: { nivel: calcularNivel(datas, nivelAnterior) } },
     { new: true },
   )
 }
