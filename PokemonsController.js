@@ -8,7 +8,7 @@ const calcularNivel = datas => {
   return diff / 4 + nivelAnterior;
 }
 
-const getAll = async () => {
+const getAll = () => {
   return pokemonsModel.find((error, pokemons) => {
     return pokemons
   })
@@ -38,6 +38,10 @@ const update = (id, pokemon) => {
 const treinar = async (id, datas) => {
   const pokemon = await pokemonsModel.findById(id, 'nivel')
   const nivelAnterior = pokemon.nivel
+
+  if (nivelAnterior >= 150){
+    throw new Error('deu ruim', 500) //throw = return | Error é uma classe
+  }
 
   return pokemonsModel.findByIdAndUpdate(
     id,
