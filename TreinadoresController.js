@@ -49,9 +49,7 @@ const addPokemon = async (treinadorId, pokemon) => {
 
 const treinarPokemon = async (treinadorId, pokemonId, datas) => {
   const treinador = await getById(treinadorId)
-  const pokemon = treinador.pokemons.find(pokemon => {
-    return pokemon._id == pokemonId
-  })
+  const pokemon = treinador.pokemons.find(pokemon => pokemon._id == pokemonId)
 
   if (pokemon.nivel >= LIMITE_NIVEL_POKEMON) {
     throw new Error('Seu pokémon já é forte o suficiente!')
