@@ -30,7 +30,7 @@ servidor.get('/pokemons', async (request, response) => {
     .then(pokemons => response.send(pokemons))
 })
 
-servidor.get('/pokemons/:pokemonId', (request, response) => {
+            servidor.get('/pokemons/:pokemonId', (request, response) => {
   const pokemonId = request.params.pokemonId
   pokemonsController.getById(pokemonId)
     .then(pokemon => {
@@ -187,6 +187,32 @@ servidor.patch('/treinadores/:treinadorId/treinar/:pokemonId', (request, respons
       }
     })
 })
+
+servidor.get('/treinadores/:treinadorId/pokemons', async (request, response) => {
+  const treinadorId = request.params.treinadorId
+  treinadoresController.getPokemons(treinadorId)
+    .then(pokemons => response.send(pokemons))
+})
+
+
+servidor.patch('/treinadores/:treinadorId/pokemon/:pokemonId', (request, response) => {
+  const treinadorId = request.params.treinadorId
+  const pokemonId = request.params.pokemonId
+
+  treinadoresController.updatePokemon(treinadorId, pokemonId, request.body) // request.body guarda os dados do pokémon
+    .then(pokemon => {
+      if(!pokemon) { response.sendStatus(404) }
+      else { response.send(pokemon) }
+    })
+    .catch(error => {
+      if(error.name === "MongoError" || error.name === "CastError"){
+        response.sendStatus(400)
+      } else {
+        response.sendStatus(500)
+      }
+    })
+})
+
 
 servidor.listen(PORT)
 console.info(`Rodando na porta ${PORT}`)
