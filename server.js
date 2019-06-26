@@ -211,5 +211,26 @@ servidor.patch('/treinadores/:treinadorId/pokemon/:pokemonId', (request, respons
     })
 })
 
+servidor.get('/treinadores/:treinadorId/pokemons/:pokemonId', (request, response) => {
+  const treinadorId = request.params.treinadorId
+  const pokemonId = request.params.pokemonId
+  treinadoresController.getByPokemonId(treinadorId, pokemonId)
+    .then(pokemon => {
+      if(!pokemon){
+        response.sendStatus(404)
+      } else {
+        response.send(pokemon)
+      }
+    })
+    .catch(error => {
+      if(error.name === "CastError"){
+        response.sendStatus(400)
+      } else {
+        response.sendStatus(500)
+      }
+    })
+})
+
+
 servidor.listen(PORT)
 console.info(`Rodando na porta ${PORT}`)
