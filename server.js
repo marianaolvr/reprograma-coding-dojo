@@ -188,5 +188,28 @@ servidor.patch('/treinadores/:treinadorId/treinar/:pokemonId', (request, respons
     })
 })
 
+servidor.get('/treinadores/:treinadorId/pokemons', async (request, response) => {
+  const treinadorId = request.params.treinadorId
+  treinadoresController.getPokemons(treinadorId)
+    .then(pokemons => response.send(pokemons))
+})
+
+servidor.patch('/treinadores/:treinadorId/pokemon/:pokemonId', (request, response) => {
+  const treinadorId = request.params.treinadorId
+  const pokemonId = request.params.pokemonId
+  treinadoresController.updatePokemon(treinadorId, pokemonId, request.body)
+    .then(pokemon => {
+      if(!pokemon) { response.sendStatus(404) }
+      else { response.send(pokemon) }
+    })
+    .catch(error => {
+      if(error.name === "MongoError" || error.name === "CastError"){
+        response.sendStatus(400)
+      } else {
+        response.sendStatus(500)
+      }
+    })
+})
+
 servidor.listen(PORT)
 console.info(`Rodando na porta ${PORT}`)
