@@ -67,8 +67,8 @@ const getPokemons = async treinadorId => {
 const updatePokemon = (treinadorId, pokemonId, pokemon) => {
   return treinadoresModel.findOneAndUpdate(
     { _id: treinadorId, "pokemons._id": pokemonId },
-    { $set: { "pokemons.$": { ...pokemon, _id: pokemonId } } },
-    { new: true }
+    { $set: { "pokemons.$": { ...pokemon, _id: pokemonId } } }, // sem usar o spread operator (...), obteremos um objeto dentro de outro (ao invés de vários atributos para alterar o pokemon)
+    { new: true } // precisamos disso para retornar uma nova instância do pokemon que encontramos, para podermos vê-lo atualizado
   )
 }
 
