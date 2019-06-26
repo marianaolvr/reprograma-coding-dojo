@@ -79,6 +79,16 @@ const updatePokemon = (treinadorId, pokemonId, pokemon) => {
 //... spread - pego o objeto que tenho lá dentro e espalho dentro do objeto que estou criado
 // new true - vai lá acha esse pokém faz os updates que eu passei e no final da um find nele de novo para me retornar ele alterado porque a função retornava uma "promisse"
 
+
+const getByPokemonId = async (treinadorId, pokemonId) => {
+  const treinador = await getById(treinadorId)
+  return treinador.pokemons.find(pokemon => {
+    return pokemon._id == pokemonId //argumento do find é que cada vez que ele tá um loop pelo pokemon me trás um pokemon
+
+  })
+}
+
+
 module.exports = {
   getAll,
   getById,
@@ -88,5 +98,6 @@ module.exports = {
   addPokemon,
   treinarPokemons,
   getPokemons,
-  updatePokemon
+  updatePokemon,
+  getByPokemonId
 }

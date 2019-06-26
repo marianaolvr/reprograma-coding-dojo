@@ -30,7 +30,7 @@ servidor.get('/pokemons', async (request, response) => {
     .then(pokemons => response.send(pokemons))
 })
 
-            servidor.get('/pokemons/:pokemonId', (request, response) => {
+servidor.get('/pokemons/:pokemonId', (request, response) => {
   const pokemonId = request.params.pokemonId
   pokemonsController.getById(pokemonId)
     .then(pokemon => {
@@ -198,7 +198,6 @@ servidor.get('/treinadores/:treinadorId/pokemons', async (request, response) => 
 servidor.patch('/treinadores/:treinadorId/pokemon/:pokemonId', (request, response) => {
   const treinadorId = request.params.treinadorId
   const pokemonId = request.params.pokemonId
-
   treinadoresController.updatePokemon(treinadorId, pokemonId, request.body) // request.body guarda os dados do pokémon
     .then(pokemon => {
       if(!pokemon) { response.sendStatus(404) }
@@ -212,6 +211,27 @@ servidor.patch('/treinadores/:treinadorId/pokemon/:pokemonId', (request, respons
       }
     })
 })
+
+servidor.get('/treinadores/:treinadorId/pokemons/:pokemonId', (request, response) => {
+  const treinadorId = request.params.treinadorId
+  const pokemonId = request.params.pokemonId
+  treinadoresController.getByPokemonId(treinadorId, pokemonId)
+    .then(pokemon => {
+      if(!pokemon){
+        response.sendStatus(404)
+      } else {
+        response.send(pokemon)
+      }
+    })
+    .catch(error => {
+      if(error.name === "CastError"){
+        response.sendStatus(400)
+      } else {
+        response.sendStatus(500)
+      }
+    })
+})
+
 
 
 servidor.listen(PORT)
