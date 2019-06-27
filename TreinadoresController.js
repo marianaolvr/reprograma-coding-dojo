@@ -1,6 +1,7 @@
 const { connect } = require('./PokemonsApiRepository')
 const treinadoresModel = require('./TreinadoresSchema')
 const { pokemonsModel } = require('./PokemonsSchema')
+const bcrypt = require('bcryptjs')
 const LIMITE_NIVEL_POKEMON = 150
 
 connect()
@@ -23,8 +24,19 @@ const getById = (id) => {
   return treinadoresModel.findById(id)
 }
 
-const add = (treinador) => {
-  const novoTreinador = new treinadoresModel(treinador)
+const add = async (treinador) => {
+  const treinadorEncontrado = await treinadoresModel.findOne({email: treinador.email})
+  
+  if (treinadorEncontrado){
+throw new Error ('E-mail já cadastrado') // não permite um usuário colocar um e-mail já cadastrado.
+  } 
+//criar hash da senha  do usuário usando Bcrypt
+const salt = bcrypt.genSaltSync(10) // gera um tipo de objeto falando qual a complexidade do hash que eu vou gerar
+const senhaCriptografada = bcrypt.hashSync(treinador.senha, salt)
+treinador.senha = senhaCriptografada //faz a senha aparecer criptografada no postman(no banco)
+
+
+  const novoTreinador = new treinadoresModel(treinador) // ({...treinador, senha: senhaCriptografada}) = spread substitui a linha 36
   return novoTreinador.save()
 }
 
@@ -88,6 +100,14 @@ const getByPokemonId = async (treinadorId, pokemonId) => {
   })
 }
 
+const login = async (loginData) => {
+  const treinadorEncontrado = await treinadoresModel.findOne({email: treinador.email})
+if (treinadorEncontrado){
+  bcrypt.compareSync(loginData.senha, treinadorEncontrado.senha) //compara
+}
+
+}
+
 
 module.exports = {
   getAll,
@@ -99,5 +119,6 @@ module.exports = {
   treinarPokemons,
   getPokemons,
   updatePokemon,
-  getByPokemonId
+  getByPokemonId,
+  login,
 }
