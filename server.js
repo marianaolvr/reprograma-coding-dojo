@@ -124,10 +124,12 @@ servidor.get('/treinadores/:treinadorId/pokemons', async (request, response) => 
 })
 
 
+
 servidor.patch('/treinadores/:treinadorId/pokemon/:pokemonId', (request, response) => {
   const treinadorId = request.params.treinadorId
   const pokemonId = request.params.pokemonId
   treinadoresController.updatePokemon(treinadorId, pokemonId, request.body) // request.body guarda os dados do pokémon
+
     .then(pokemon => {
       if(!pokemon) { response.sendStatus(404) }
       else { response.send(pokemon) }
@@ -166,6 +168,7 @@ servidor.get('/treinadores/:treinadorId/pokemons/:pokemonId', (request, response
 
 servidor.post('/treinadores/login', (request, response) => {
   treinadoresController.login(request.body) // metodo login recebe email e senha que estão no body
+
     .then(loginResponse => {
       response.send(loginResponse)
     })
