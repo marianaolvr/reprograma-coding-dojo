@@ -27,8 +27,9 @@ const getById = (id) => {
 }
 
 const add = async (treinador) => {
-
-  const treinadorEncontrado = await treinadoresModel.findOne({email: treinador.email})
+  const treinadorEncontrado = await treinadoresModel.findOne( //treinadoresModel retorna uma Schema
+    {email: treinador.email}
+    ) //quyre
   
   if (treinadorEncontrado){
 throw new Error ('E-mail já cadastrado') // não permite um usuário colocar um e-mail já cadastrado.
