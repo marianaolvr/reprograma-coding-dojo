@@ -1,7 +1,9 @@
+require('dotenv-safe').load()
 const { connect } = require('./PokemonsApiRepository')
 const treinadoresModel = require('./TreinadoresSchema')
 const { pokemonsModel } = require('./PokemonsSchema')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const LIMITE_NIVEL_POKEMON = 150
 
 connect()
@@ -78,13 +80,12 @@ const getPokemons = async treinadorId =>{
 }
 
 const updatePokemon = (treinadorId, pokemonId, pokemon) => {
-  pokemon._id = pokemonId
-  return treinadoresModel.findOneAndUpdate(
-    { _id: treinadorId, "pokemons._id": pokemonId   }, // o primeiro parametro do findOneAndUpdate é uma query com filtros que devem ser procurados
-    { $set: { "pokemons.$": {...pokemon, _id: pokemonId}}},  //segundo parâmetro da função findOneAndUpdate //set faz update dos atributos que a gente passar para ele
-    { new: true }
-    )
-} 
+  return treinadoresModel.findOneAndUpdate( // o primeiro parametro do findOneAndUpdate é uma query com filtros que devem ser procurados
+    { _id: treinadorId, "pokemons._id": pokemonId }, //segundo parâmetro da função findOneAndUpdate //set faz update dos atributos que a gente passar para ele
+    { $set: { "pokemons.$": { ...pokemon, _id: pokemonId } } }, // sem usar o spread operator (...), obteremos um objeto dentro de outro (ao invés de vários atributos para alterar o pokemon)
+    { new: true } // precisamos disso para retornar uma nova instância do pokemon que encontramos, para podermos vê-lo atualizado
+  )
+}
 
 // $ cifraozinho é como se fosse uma variável, não carrega valor até que eu coloque um valor nele - significa que eu to acessando um index especídico de um pokemon que eu estou procurando
 // embeded pokemon.$
@@ -101,12 +102,28 @@ const getByPokemonId = async (treinadorId, pokemonId) => {
 }
 
 const login = async (loginData) => {
-  const treinadorEncontrado = await treinadoresModel.findOne({email: treinador.email})
-if (treinadorEncontrado){
-  bcrypt.compareSync(loginData.senha, treinadorEncontrado.senha) //compara
+  const treinadorEncontrado = await treinadoresModel.findOne(
+    { email: loginData.email }
+  )
+
+  if (treinadorEncontrado) {
+    const senhaCorreta = bcrypt.compareSync(loginData.senha, treinadorEncontrado.senha) //compara 
+
+    if (senhaCorreta) {
+      const token = jwt.sign(
+        { email: treinadorEncontrado.email, id: treinadorEncontrado._id },
+        process.env.PRIVATE_KEY
+      )
+      return { auth: true, token }; //quando vc tem uma chave que gera o mesmo nome do seu valor pode colocar uma só vez e não  token: token
+    } else {
+      throw new Error('Senha incorreta, prestenção parça') // throw imediatamente sai da função
+    }
+  } else {
+    throw new Error('Email não está cadastrado')
+  }
 }
 
-}
+
 
 
 module.exports = {
