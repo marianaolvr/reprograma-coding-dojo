@@ -76,6 +76,7 @@ servidor.post('/treinadores', (request, response) => {
       if(error.name === "ValidationError"){
         response.sendStatus(400)
       } else {
+        console.log(error)
         response.sendStatus(500)
       }
     })
@@ -159,6 +160,21 @@ servidor.get('/treinadores/:treinadorId/pokemons/:pokemonId', (request, response
     })
 })
 
+servidor.post('/treinadores/login', (request, response) => {
+  treinadoresController.login(request.body)
+    .then(loginResponse => {
+      response.send(loginResponse)
+    })
+    .catch(error => {
+      if(error.name === "ValidationError"){
+        console.log(error)
+        response.sendStatus(400)
+      } else {
+        console.log(error)
+        response.sendStatus(500)
+      }
+    })
+})
 
 servidor.listen(PORT)
 console.info(`Rodando na porta ${PORT}`)

@@ -1,6 +1,9 @@
+require('dotenv-safe').load()
 const { connect } = require('./PokemonsApiRepository')
 const treinadoresModel = require('./TreinadoresSchema')
 const { pokemonsModel } = require('./PokemonsSchema')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const LIMITE_NIVEL_POKEMON = 150
 
 connect()
@@ -22,7 +25,17 @@ const getById = (id) => {
   return treinadoresModel.findById(id)
 }
 
-const add = (treinador) => {
+const add = async (treinador) => {
+  const treinadorEncontrado = await treinadoresModel.findOne({ email: treinador.email })
+
+  if (treinadorEncontrado) {
+    throw new Error('Email já cadastrado')
+  }
+
+  const salt = bcrypt.genSaltSync(10)
+  const senhaCriptografada = bcrypt.hashSync(treinador.senha, salt)
+  treinador.senha = senhaCriptografada
+
   const novoTreinador = new treinadoresModel(treinador)
   return novoTreinador.save()
 }
@@ -79,6 +92,28 @@ const getByPokemonId = async (treinadorId, pokemonId) => {
   })
 }
 
+const login = async (loginData) => {
+  const treinadorEncontrado = await treinadoresModel.findOne(
+    { email: loginData.email }
+  )
+
+  if (treinadorEncontrado) {
+    const senhaCorreta = bcrypt.compareSync(loginData.senha, treinadorEncontrado.senha)
+
+    if (senhaCorreta) {
+      const token = jwt.sign(
+        { email: treinadorEncontrado.email, id: treinadorEncontrado._id },
+        process.env.PRIVATE_KEY
+      )
+      return { auth: true, token };
+    } else {
+      throw new Error('Senha incorreta, prestenção parça')
+    }
+  } else {
+    throw new Error('Email não está cadastrado')
+  }
+}
+
 module.exports = {
   getAll,
   getById,
@@ -89,5 +124,6 @@ module.exports = {
   treinarPokemon,
   getPokemons,
   updatePokemon,
-  getByPokemonId
+  getByPokemonId,
+  login
 }
